@@ -11,6 +11,8 @@ import Foundation
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDelegate {
+    static let appName = "УкротиСпоти"
+
     let endlessPrivateSessionKey = "EndlessPrivateSession"
     let restartToSkipAdsKey = "RestartToSkipAds"
     let startSpotifyKey = "StartSpotify"
@@ -133,9 +135,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
         
         // Get application version
         let version = Bundle.main.infoDictionary!["CFBundleShortVersionString"]!
-        titleMenuItem.title = titleMenuItem.title + " v\(version)"
-        
-        print("MuteSpotifyAds v\(version)")
+        titleMenuItem.title = "☂︎ \(AppDelegate.appName) v\(version) beta"
+
+        print("\(AppDelegate.appName) v\(version) beta")
         print("macOS \(ProcessInfo.processInfo.operatingSystemVersionString))")
         
         spotifyManager = SpotifyManager(titleChangeHandler: {

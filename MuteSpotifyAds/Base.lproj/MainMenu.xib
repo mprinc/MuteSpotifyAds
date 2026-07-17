@@ -26,7 +26,7 @@
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu id="KUr-cl-g3N">
             <items>
-                <menuItem title="☂︎ MuteSpotifyAds" id="Qme-N6-cSD">
+                <menuItem title="☂︎ УкротиСпоти" id="Qme-N6-cSD">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="openProjectWebsite:" target="Voe-Tx-rLC" id="oYX-Ka-nYd"/>
