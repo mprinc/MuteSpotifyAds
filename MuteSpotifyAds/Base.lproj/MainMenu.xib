@@ -19,6 +19,7 @@
                 <outlet property="restartToSkipAdsCheckbox" destination="7pt-Ak-HDD" id="DD7-3v-iN8"/>
                 <outlet property="songLogCheckbox" destination="GPc-bM-QPt" id="Cvp-2p-C95"/>
                 <outlet property="startSpotifyCheckbox" destination="Zxc-BN-6PQ" id="aSJ-67-53J"/>
+                <outlet property="startSpotifyInBackgroundCheckbox" destination="BgS-Sp-1nX" id="BgS-Ol-3uZ"/>
                 <outlet property="statusMenu" destination="KUr-cl-g3N" id="quZ-j6-rXq"/>
                 <outlet property="titleMenuItem" destination="Qme-N6-cSD" id="InN-nV-s8I"/>
             </connections>
@@ -49,6 +50,12 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>
                         <action selector="toggleSpotifyStart:" target="Voe-Tx-rLC" id="LId-yN-U4o"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="⇥  Start Spotify in background" id="BgS-Sp-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="toggleStartSpotifyInBackground:" target="Voe-Tx-rLC" id="BgS-Ac-2tY"/>
                     </connections>
                 </menuItem>
                 <menuItem title=" •  Notifications" id="xcw-JU-8Ai">

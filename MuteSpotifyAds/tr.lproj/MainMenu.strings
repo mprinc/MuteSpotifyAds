@@ -26,5 +26,8 @@
 /* Class = "NSMenuItem"; title = "⊗  Quit"; ObjectID = "vrP-PM-sCp"; */
 "vrP-PM-sCp.title" = "⊗  Çıkış";
 
+/* Class = "NSMenuItem"; title = "⇥  Start Spotify in background"; ObjectID = "BgS-Sp-1nX"; */
+"BgS-Sp-1nX.title" = "⇥  Spotify'i arka planda başlat";
+
 /* Class = "NSMenuItem"; title = " •  Notifications"; ObjectID = "xcw-JU-8Ai"; */
 "xcw-JU-8Ai.title" = " •  Bildirimler";

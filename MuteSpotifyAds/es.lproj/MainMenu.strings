@@ -23,6 +23,9 @@
 /* Class = "NSMenuItem"; title = "∞  Private session"; ObjectID = "o3E-lf-Jhd"; */
 "o3E-lf-Jhd.title" = "∞  Private session";
 
+/* Class = "NSMenuItem"; title = "⇥  Start Spotify in background"; ObjectID = "BgS-Sp-1nX"; */
+"BgS-Sp-1nX.title" = "⇥  Iniciar Spotify en segundo plano";
+
 /* Class = "NSMenuItem"; title = " ©  Simon Meusel"; ObjectID = "rc4-2Q-6hz"; */
 "rc4-2Q-6hz.title" = " ©  Simon Meusel";
 

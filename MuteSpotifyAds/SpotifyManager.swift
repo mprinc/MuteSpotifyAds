@@ -17,6 +17,7 @@ class SpotifyManager: NSObject {
     
     var endlessPrivateSessionEnabled = false
     var restartToSkipAdsEnabled = false
+    var startSpotifyInBackground = false
     var songLogPath: String? = nil
     var startSpotify = false
     
@@ -57,6 +58,7 @@ class SpotifyManager: NSObject {
         if (isRestarting) {
             // Start plaing after Spotify got restarted
             self.spotifyPlay()
+            self.hideSpotify()
             if (isSpotifyPaused()) {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                     self.handleSpotifyQuit()
@@ -77,7 +79,7 @@ class SpotifyManager: NSObject {
     func startWatchingForFileChanges() {
         if startSpotify {
             DispatchQueue.global(qos: .default).async {
-                self.startSpotify(foreground: true)
+                self.startSpotify(foreground: !self.startSpotifyInBackground)
                 _ = self.handleTrackChanged()
             }
         }
@@ -245,8 +247,10 @@ class SpotifyManager: NSObject {
         startSpotify(foreground: false)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
             self.spotifyPlay()
+            self.hideSpotify()
             DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
                 self.spotifyPlay()
+                self.hideSpotify()
                 self.titleChangeHandler(.noAd)
                 self.isRestarting = false
             })
@@ -282,6 +286,10 @@ class SpotifyManager: NSObject {
     
     func spotifyPlay() {
         _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "play")
+    }
+
+    func hideSpotify() {
+        _ = runAppleScript(script: "tell application \"System Events\" to set visible of process \"Spotify\" to false")
     }
     
     /**

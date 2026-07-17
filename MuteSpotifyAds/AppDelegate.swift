@@ -16,6 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
     let endlessPrivateSessionKey = "EndlessPrivateSession"
     let restartToSkipAdsKey = "RestartToSkipAds"
     let startSpotifyKey = "StartSpotify"
+    let startSpotifyInBackgroundKey = "StartSpotifyInBackground"
     let notificationsKey = "Notifications"
     let songLogPathKey = "SongLogPath"
     
@@ -24,6 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
     @IBOutlet weak var endlessPrivateSessionCheckbox: NSMenuItem!
     @IBOutlet weak var restartToSkipAdsCheckbox: NSMenuItem!
     @IBOutlet weak var startSpotifyCheckbox: NSMenuItem!
+    @IBOutlet weak var startSpotifyInBackgroundCheckbox: NSMenuItem!
     @IBOutlet weak var notificationsCheckbox: NSMenuItem!
     @IBOutlet weak var songLogCheckbox: NSMenuItem!
     
@@ -103,6 +105,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
         UserDefaults.standard.set(spotifyManager?.startSpotify, forKey: startSpotifyKey)
     }
     
+    @IBAction func toggleStartSpotifyInBackground(_ sender: NSMenuItem) {
+        if spotifyManager!.startSpotifyInBackground {
+            spotifyManager?.startSpotifyInBackground = false
+            sender.state = .off
+        } else {
+            spotifyManager?.startSpotifyInBackground = true
+            sender.state = .on
+        }
+        UserDefaults.standard.set(spotifyManager?.startSpotifyInBackground, forKey: startSpotifyInBackgroundKey)
+    }
+
     @IBAction func toggleSongLog(_ sender: NSMenuItem) {
         if spotifyManager?.songLogPath != nil {
             spotifyManager?.songLogPath = nil
@@ -163,7 +176,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
             spotifyManager?.startSpotify = true
             startSpotifyCheckbox.state = .on
         }
-        
+
+        if UserDefaults.standard.bool(forKey: startSpotifyInBackgroundKey) {
+            spotifyManager?.startSpotifyInBackground = true
+            startSpotifyInBackgroundCheckbox.state = .on
+        }
+
         if UserDefaults.standard.object(forKey: notificationsKey) == nil {
             UserDefaults.standard.set(true, forKey: notificationsKey)
         }
