@@ -9,7 +9,6 @@
 import Cocoa
 import Foundation
 
-@NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDelegate {
     static let appName = "УкротиСпоти"
 

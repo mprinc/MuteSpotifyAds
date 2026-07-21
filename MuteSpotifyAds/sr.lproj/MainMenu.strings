@@ -1,0 +1,35 @@
+/* Class = "NSMenuItem"; title = "◎ Restart to skip ads"; ObjectID = "7pt-Ak-HDD"; */
+"7pt-Ak-HDD.title" = "◎ Рестартуј да прескочиш рекламе";
+
+/* Class = "NSMenuItem"; title = "🐛 Report a bug"; ObjectID = "95E-eS-QXO"; */
+"95E-eS-QXO.title" = "🐛 Пријави грешку";
+
+/* Class = "NSMenuItem"; title = "🔖 License"; ObjectID = "DTq-sR-yDf"; */
+"DTq-sR-yDf.title" = "🔖 Лиценца";
+
+/* Class = "NSMenuItem"; title = "≡  Song log"; ObjectID = "GPc-bM-QPt"; */
+"GPc-bM-QPt.title" = "≡  Дневник нумера";
+
+/* Class = "NSMenuItem"; title = "☂︎ УкротиСпоти"; ObjectID = "Qme-N6-cSD"; */
+"Qme-N6-cSD.title" = "☂︎ УкротиСпоти";
+
+/* Class = "NSMenuItem"; title = "⚠ Quit with Spotify"; ObjectID = "Ruj-6m-HE0"; */
+"Ruj-6m-HE0.title" = "⚠ Угаси са Спотифајем";
+
+/* Class = "NSMenuItem"; title = "➤  Auto-start Spotify"; ObjectID = "Zxc-BN-6PQ"; */
+"Zxc-BN-6PQ.title" = "➤  Аутоматски покрени Спотифај";
+
+/* Class = "NSMenuItem"; title = "∞  Private session"; ObjectID = "o3E-lf-Jhd"; */
+"o3E-lf-Jhd.title" = "∞  Приватна сесија";
+
+/* Class = "NSMenuItem"; title = "⊗  Quit"; ObjectID = "vrP-PM-sCp"; */
+"vrP-PM-sCp.title" = "⊗  Угаси";
+
+/* Class = "NSMenuItem"; title = "⇥  Start Spotify in background"; ObjectID = "BgS-Sp-1nX"; */
+"BgS-Sp-1nX.title" = "⇥  Покрени Спотифај у позадини";
+
+/* Class = "NSMenuItem"; title = " •  Notifications"; ObjectID = "xcw-JU-8Ai"; */
+"xcw-JU-8Ai.title" = " •  Обавјештења";
+
+/* Class = "NSMenuItem"; title = " ©  Simon Meusel"; ObjectID = "rc4-2Q-6hz"; */
+"rc4-2Q-6hz.title" = " ©  Simon Meusel";
