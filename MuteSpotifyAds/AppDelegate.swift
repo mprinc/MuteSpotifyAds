@@ -27,12 +27,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
     @IBOutlet weak var startSpotifyInBackgroundCheckbox: NSMenuItem!
     @IBOutlet weak var notificationsCheckbox: NSMenuItem!
     @IBOutlet weak var songLogCheckbox: NSMenuItem!
-    
+    @IBOutlet weak var playPauseMenuItem: NSMenuItem!
+
     var notificationsEnabled = false
     
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     var spotifyManager: SpotifyManager?
     
+    @IBAction func playPause(_ sender: Any) {
+        spotifyManager?.toggleSpotifyPlayPause()
+        updatePlayPauseTitle()
+    }
+
+    @IBAction func launchSpotify(_ sender: Any) {
+        spotifyManager?.startSpotify(foreground: true)
+    }
+
+    @IBAction func simulateAdRestart(_ sender: Any) {
+        spotifyManager?.restartSpotify()
+    }
+
     @IBAction func quit(_ sender: Any) {
         NSApplication.shared.terminate(self)
     }
@@ -144,6 +158,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
         
         setStatusBarTitle(title: .noAd)
         statusItem.menu = statusMenu
+        statusMenu.delegate = self
         
         // Get application version
         let version = Bundle.main.infoDictionary!["CFBundleShortVersionString"]!
@@ -219,10 +234,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
         return true
     }
     
+    func updatePlayPauseTitle() {
+        if spotifyManager?.isSpotifyPaused() == true {
+            playPauseMenuItem.title = "▶  Свирај"
+        } else {
+            playPauseMenuItem.title = "⏸  Паузирај"
+        }
+    }
+
     func openWebsite(url: String) {
         let url = URL(string: url)
         NSWorkspace.shared.open(url!)
     }
-    
+
+}
+
+extension AppDelegate: NSMenuDelegate {
+    func menuWillOpen(_ menu: NSMenu) {
+        updatePlayPauseTitle()
+    }
 }
 

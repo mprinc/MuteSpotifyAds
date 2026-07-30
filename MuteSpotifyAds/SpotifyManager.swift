@@ -33,7 +33,7 @@ class SpotifyManager: NSObject {
      * Whether Spotify is getting restarted
      */
     var isRestarting = false
-    
+
     var lastSongSpotifyURL: String = ""
     
     init(titleChangeHandler: @escaping ((StatusBarTitle) -> Void)) {
@@ -56,24 +56,73 @@ class SpotifyManager: NSObject {
     
     func handleSpotifyQuit() {
         if (isRestarting) {
-            // Start plaing after Spotify got restarted
-            self.spotifyPlay()
-            self.hideSpotify()
-            if (isSpotifyPaused()) {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-                    self.handleSpotifyQuit()
-                })
-            } else {
-                self.titleChangeHandler(.noAd)
-                self.isRestarting = false
-            }
+            self.ensureSpotifyPlays(attempt: 0, lastStateBeforePlay: nil)
         } else {
             NSApplication.shared.terminate(self)
         }
     }
+
+    /**
+     * Retry play до 15s. Ако корисник сам промијени стање — одустани.
+     */
+    func ensureSpotifyPlays(attempt: Int, lastStateBeforePlay: String?) {
+        let maxAttempts = 15 // 15 x 1s = 15s
+
+        // Провјери тренутно стање ПРИЈЕ play-а
+        let stateBefore = getSpotifyPlayerState()
+
+        // Ако имамо претходно стање и разликује се од очекиваног —
+        // корисник је интереаговао (нпр. ручно паузирао или покренуо)
+        if let lastState = lastStateBeforePlay {
+            // Послије нашег play-а, стање је требало бити "playing".
+            // Ако је сад нешто друго (нпр. "paused") а ми смо послали play —
+            // значи корисник је у међувремену паузирао. Одустани.
+            if lastState == "playing" && stateBefore == "paused" {
+                self.finishRestart()
+                return
+            }
+        }
+
+        if isSpotifyPlaying() {
+            // Spotify свира — готово
+            self.sendSpotifyToBack()
+            self.finishRestart()
+            return
+        }
+
+        if attempt >= maxAttempts {
+            // Истекло вријеме — одустани
+            self.finishRestart()
+            return
+        }
+
+        // Пошаљи play
+        self.spotifyPlay()
+        self.sendSpotifyToBack()
+
+        let stateAfterPlay = getSpotifyPlayerState()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+            self.ensureSpotifyPlays(attempt: attempt + 1, lastStateBeforePlay: stateAfterPlay)
+        })
+    }
+
+    func finishRestart() {
+        self.sendSpotifyToBack()
+        self.titleChangeHandler(.noAd)
+        self.isRestarting = false
+    }
     
+    func getSpotifyPlayerState() -> String {
+        return runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "(get player state)").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     func isSpotifyPaused() -> Bool {
-        return runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "(get player state)") == "paused"
+        return getSpotifyPlayerState() == "paused"
+    }
+
+    func isSpotifyPlaying() -> Bool {
+        return getSpotifyPlayerState() == "playing"
     }
     
     func startWatchingForFileChanges() {
@@ -245,16 +294,6 @@ class SpotifyManager: NSObject {
         titleChangeHandler(.ad)
         _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "quit")
         startSpotify(foreground: false)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-            self.spotifyPlay()
-            self.hideSpotify()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: {
-                self.spotifyPlay()
-                self.hideSpotify()
-                self.titleChangeHandler(.noAd)
-                self.isRestarting = false
-            })
-        })
     }
     
     func quitSpotify() {
@@ -288,8 +327,24 @@ class SpotifyManager: NSObject {
         _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "play")
     }
 
-    func hideSpotify() {
-        _ = runAppleScript(script: "tell application \"System Events\" to set visible of process \"Spotify\" to false")
+    func sendSpotifyToBack() {
+        let spotifyBundleId = "com.spotify.client"
+        guard NSWorkspace.shared.frontmostApplication?.bundleIdentifier == spotifyBundleId else {
+            return // Spotify није frontmost — не дирај корисников фокус
+        }
+        _ = runAppleScript(script: "tell application \"System Events\" to set frontmost of process \"Spotify\" to false")
+
+        // Fallback: ако Spotify и даље frontmost, активирај прву видљиву апликацију иза
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
+            if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == spotifyBundleId {
+                for app in NSWorkspace.shared.runningApplications {
+                    if app.activationPolicy == .regular && !app.isHidden && app.bundleIdentifier != spotifyBundleId {
+                        app.activate(options: [])
+                        break
+                    }
+                }
+            }
+        })
     }
     
     /**

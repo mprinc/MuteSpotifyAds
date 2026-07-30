@@ -1,3 +1,9 @@
+/* Class = "NSMenuItem"; title = "▶  Play/Pause"; ObjectID = "PlP-Ps-1nX"; */
+"PlP-Ps-1nX.title" = "▶  Свирај";
+
+/* Class = "NSMenuItem"; title = "🚀 Launch Spotify"; ObjectID = "Lnc-Sp-1nX"; */
+"Lnc-Sp-1nX.title" = "🚀 Покрени Спотифај";
+
 /* Class = "NSMenuItem"; title = "◎ Restart to skip ads"; ObjectID = "7pt-Ak-HDD"; */
 "7pt-Ak-HDD.title" = "◎ Рестартуј да прескочиш рекламе";
 
@@ -30,6 +36,9 @@
 
 /* Class = "NSMenuItem"; title = " •  Notifications"; ObjectID = "xcw-JU-8Ai"; */
 "xcw-JU-8Ai.title" = " •  Обавјештења";
+
+/* Class = "NSMenuItem"; title = "🧪 Test: simulate ad"; ObjectID = "Tst-Ad-1nX"; */
+"Tst-Ad-1nX.title" = "🧪 Тест: симулирај рекламу";
 
 /* Class = "NSMenuItem"; title = " ©  Simon Meusel"; ObjectID = "rc4-2Q-6hz"; */
 "rc4-2Q-6hz.title" = " ©  Simon Meusel";
