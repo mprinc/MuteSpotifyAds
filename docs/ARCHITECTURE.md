@@ -1,72 +1,214 @@
-# Архитектура MuteSpotifyAds
+# Архитектура УкротиСпоти (MuteSpotifyAds)
 
 ## Преглед
 
-MuteSpotifyAds је нативна macOS апликација (Cocoa/Swift) која аутоматски утишава рекламе у Spotify десктоп клијенту. Апликација ради као status bar агент (LSUIElement) -- нема Dock икону ни главни прозор, само мени у status bar-у.
+Нативна macOS апликација (Cocoa/Swift) која аутоматски утишава или прескаче рекламе у Spotify десктоп клијенту. Ради као status bar агент (LSUIElement) -- нема Dock икону ни главни прозор, само мени у status bar-у.
 
 ## Компоненте
 
+### main.swift (`/Users/mprinc/data/development/3rd-party-zontik/sound/MuteSpotifyAds/MuteSpotifyAds/main.swift`)
+
+Entry point апликације. Форсира српски (ћирилица) као језик апликације постављањем `AppleLanguages` у UserDefaults **прије** учитавања NIB-а. Замјењује `@NSApplicationMain` атрибут.
+
 ### AppDelegate (`/Users/mprinc/data/development/3rd-party-zontik/sound/MuteSpotifyAds/MuteSpotifyAds/AppDelegate.swift`)
 
-Главна улазна тачка апликације. Одговорна за:
+UI слој апликације. Одговорна за:
 
-- **UI менаџмент** -- управља status bar менијем (NSStatusItem) и свим menu item-има (checkbox-и за опције)
-- **Персистенција подешавања** -- чита/пише корисничка подешавања преко `UserDefaults` (endless private session, restart to skip ads, start Spotify, notifications, song log path)
-- **Нотификације** -- шаље macOS нотификације кад се реклама детектује (NSUserNotification)
-- **Status bar наслов** -- ажурира status bar икону (☀︎ = нема рекламе, ☂︎ = реклама)
-- **Животни циклус** -- иницијализује SpotifyManager при покретању, гаси апликацију кад корисник одлучи
+- **Status bar мени** -- управља NSStatusItem и свим menu item-има (checkbox прекидачи за опције)
+- **Персистенција подешавања** -- чита/пише UserDefaults (private session, restart to skip, start Spotify, start in background, notifications, song log path)
+- **Нотификације** -- шаље macOS нотификације кад се реклама детектује
+- **Status bar наслов** -- ажурира икону (☀︎ = нема рекламе, ☂︎ = реклама)
+- **Константе** -- `appName = "УкротиСпоти"` као једно мјесто за име апликације
+- **Тест** -- `simulateAdRestart` за ручно тестирање restart flow-а
 
 ### SpotifyManager (`/Users/mprinc/data/development/3rd-party-zontik/sound/MuteSpotifyAds/MuteSpotifyAds/SpotifyManager.swift`)
 
-Централна бизнис логика апликације. Одговорна за:
+Централна бизнис логика. Одговорна за:
 
-- **File System мониторинг** -- прати промјене на Spotify фајловима (`recently_played.bnk` и `ad-state-storage.bnk`) преко FSEventStream API-ја. Ово је кључ ефикасности -- апликација не poll-ује, већ реагује само на промјене фајлова
-- **Детекција реклама** -- преко AppleScript-а провјерава Spotify URL тренутне нумере (`spotify:ad` префикс = реклама)
-- **Mute/Unmute** -- чува корисничку јачину звука прије мутирања, враћа је кад реклама заврши
-- **Restart to skip** -- опционално рестартује Spotify да прескочи рекламу, уз управљање play/pause стањем
-- **Private session** -- преко AppleScript-а кликне на "Private Session" у Spotify менију (System Events аутоматизација)
-- **Song logging** -- логује информације о свакој нумери у CSV фајл (назив, артист, албум, итд.)
-- **Покретање/гашење Spotify-ја** -- контролише животни циклус Spotify клијента преко `NSWorkspace` нотификација и `/usr/bin/open`
+- **File System мониторинг** -- прати промјене на Spotify кеш фајловима преко FSEventStream API-ја (event-driven, не polling)
+- **Детекција реклама** -- провјерава Spotify URL тренутне нумере (`spotify:ad` префикс)
+- **Mute/Unmute** -- чува јачину звука прије мутирања, враћа кад реклама заврши
+- **Restart to skip** -- гаси и поново покреће Spotify да прескочи рекламу
+- **Window management** -- `sendSpotifyToBack()` спречава Spotify да краде фокус при рестарту
+- **Private session** -- преко System Events AppleScript-а одржава приватну сесију
+- **Song logging** -- логује нумере у CSV фајл
+- **Животни циклус Spotify-ја** -- покретање, гашење, детекција гашења преко NSWorkspace нотификација
 
 ### StatusBarTitle (`/Users/mprinc/data/development/3rd-party-zontik/sound/MuteSpotifyAds/MuteSpotifyAds/StatusBarTitle.swift`)
 
 Enum са два стања status bar наслова:
-- `.noAd` = `☀︎` (сунце -- све у реду)
-- `.ad` = `☂︎` (кишобран -- реклама у току)
+- `.noAd` = `☀︎` (сунце -- нормално пуштање)
+- `.ad` = `☂︎` (кишобран -- реклама детектована)
 
 ### MainMenu.xib (`/Users/mprinc/data/development/3rd-party-zontik/sound/MuteSpotifyAds/MuteSpotifyAds/Base.lproj/MainMenu.xib`)
 
-Interface Builder фајл са дефиницијом status bar менија и свих menu item-а. Повезан са AppDelegate преко IBOutlet/IBAction веза.
+Interface Builder фајл са дефиницијом status bar менија. Повезан са AppDelegate преко IBOutlet/IBAction веза. Локализован на 7 језика (sr, en, de, es, it, tr, zh-Hans).
 
 ## Комуникација између компоненти
 
 ```
-┌──────────────┐       titleChangeHandler       ┌────────────────┐
-│  AppDelegate │ ◄──────── callback ──────────── │ SpotifyManager │
-│              │                                 │                │
-│ • UI/Menu    │ ─── методе (toggle, start) ──► │ • FS Events    │
-│ • StatusBar  │                                 │ • AppleScript  │
-│ • UserDefaults│                                │ • Ad detection │
-└──────┬───────┘                                 └───────┬────────┘
-       │                                                 │
-       │ reads                                           │ watches
-       ▼                                                 ▼
-  UserDefaults                              ~/Library/Application Support/
-  (подешавања)                              Spotify/Users/*-user/
-                                            ├── recently_played.bnk
-                                            └── ad-state-storage.bnk
+┌────────────┐     titleChangeHandler      ┌────────────────┐
+│ AppDelegate │ ◄────── callback ────────── │ SpotifyManager │
+│             │                            │                │
+│ • UI/Menu   │ ── методе (toggle, ...) ─► │ • FS Events    │
+│ • StatusBar │                            │ • AppleScript  │
+│ • Defaults  │                            │ • Ad detection │
+│ • Тест      │                            │ • Window mgmt  │
+└─────┬───────┘                            └──┬─────────┬───┘
+      │                                       │         │
+      │ reads/writes                           │watches  │controls
+      ▼                                        ▼         ▼
+ UserDefaults                    ~/Library/App Support/  Spotify.app
+ (подешавања)                    Spotify/Users/*-user/   (AppleScript)
+                                 ├── recently_played.bnk
+                                 └── ad-state-storage.bnk
 ```
 
-1. **AppDelegate → SpotifyManager**: AppDelegate креира SpotifyManager и прослеђује callback за промјену наслова. Кроз menu item акције (IBAction), директно позива методе SpotifyManager-а.
-2. **SpotifyManager → AppDelegate**: SpotifyManager комуницира назад кроз `titleChangeHandler` callback кад се стање промијени (реклама почела/завршила).
-3. **SpotifyManager → Spotify**: Комуницира преко AppleScript-а (`/usr/bin/osascript`) за контролу јачине звука, детекцију реклама, play/pause, и private session.
-4. **SpotifyManager → File System**: Прати промјене на Spotify кеш фајловима преко macOS FSEventStream API-ја.
+## Детекција реклама
+
+```
+Spotify мијења фајл
+        │
+        ▼
+FSEventStream детектује промјену
+        │
+        ▼
+handleTrackChanged()
+        │
+        ├── isSpotifyAdPlaying()? ── ДА ──┐
+        │                                  │
+        │                    ┌─────────────┤
+        │                    │             │
+        │           restartToSkip?    само mute?
+        │                    │             │
+        │                    ▼             ▼
+        │           restartSpotify()  setVolume(0)
+        │                    │        titleChange(.ad)
+        │                    │
+        │                    ▼
+        │           (види "Restart flow" испод)
+        │
+        ├── НЕ (нормална нумера) ──┐
+        │                          │
+        │                   muted? ── ДА → врати јачину
+        │                          │       titleChange(.noAd)
+        │                          │
+        │                   endlessPrivateSession? ── ДА → enablePrivateSession()
+        │                          │
+        └── songLog? ── ДА → logSong()
+```
+
+## Restart flow (прескакање реклама)
+
+Ово је најкомплекснији дио апликације. Два метода сарађују:
+
+```
+restartSpotify()                          handleSpotifyQuit()
+═══════════════                           ═══════════════════
+Позива се кад се                          Позива се кад macOS
+детектује реклама.                        јави да је Spotify умро.
+                                          isRestarting флег одлучује:
+1. isRestarting = true                    
+2. titleChange(.ad)                       isRestarting == true?
+3. quit Spotify (AppleScript) ─────────►  │
+4. start Spotify (--hide --background)    │  ДА: Spotify се рестартује
+   (готово, нема тајмера)                 │  ├── play (AppleScript)
+                                          │  ├── sendSpotifyToBack()
+                                          │  ├── паузиран? → чекај 1s → понови
+                                          │  └── свира! → sendSpotifyToBack()
+                                          │              → titleChange(.noAd)
+                                          │              → isRestarting = false
+                                          │
+                                          │  НЕ: Корисник затворио Spotify
+                                          │  └── terminate(self)
+                                          │      (угаси и нашу апликацију)
+```
+
+**Кључне одлуке:**
+- `restartSpotify()` само гаси и покреће Spotify -- нема тајмере ни play логику
+- `handleSpotifyQuit()` преузима сву play + window management логику
+- Један пут, нема паралелних тајмера, нема трке
+- `isRestarting` флег разликује "ми рестартујемо" од "корисник затворио"
+
+## Window management (sendSpotifyToBack)
+
+Спречава Spotify да краде фокус при рестарту:
+
+```
+sendSpotifyToBack()
+        │
+        ├── Spotify НИЈЕ frontmost? → не ради ништа
+        │   (корисник је већ Cmd+Tab-овао, не дирај)
+        │
+        ├── Spotify ЈЕСТЕ frontmost:
+        │   │
+        │   ▼
+        │   set frontmost of Spotify to false
+        │   (macOS сам активира сљедећу апликацију у стеку)
+        │   │
+        │   ▼ (200ms касније)
+        │   │
+        │   ├── Spotify ВИШЕ НИЈЕ frontmost? → готово
+        │   │
+        │   └── Spotify И ДАЉЕ frontmost? (fallback)
+        │       → пронађи прву видљиву апликацију
+        │       → activate њу
+```
 
 ## Животни циклус апликације
 
-1. AppDelegate.applicationDidFinishLaunching() иницијализује UI и подешавања
-2. Креира SpotifyManager са callback-ом за промјену наслова
-3. Учитава сачувана подешавања из UserDefaults
-4. SpotifyManager.startWatchingForFileChanges() покреће Spotify (ако је подешено) и FSEventStream мониторинг
-5. Кад се Spotify фајл промијени → handleTrackChanged() → провјерава да ли је реклама → mute/unmute
-6. Кад корисник затвори Spotify → NSWorkspace нотификација → апликација се гаси (осим ако је restart у току)
+```
+main.swift                  AppDelegate                    SpotifyManager
+══════════                  ═══════════                    ══════════════
+AppleLanguages=sr
+        │
+        ▼
+NSApplicationMain()
+        │
+        ▼
+                    applicationDidFinishLaunching()
+                    ├── setStatusBarTitle(.noAd)
+                    ├── прикажи верзију у менију
+                    ├── креирај SpotifyManager(callback)
+                    ├── учитај подешавања из UserDefaults
+                    │   ├── endlessPrivateSession
+                    │   ├── restartToSkipAds
+                    │   ├── startSpotify
+                    │   ├── startSpotifyInBackground
+                    │   ├── notifications
+                    │   └── songLogPath
+                    └── startWatchingForFileChanges() ────► покрени Spotify
+                                                           покрени FSEventStream
+                                                                   │
+                                                           ┌───────┘
+                                                           │ (event loop)
+                                                           ▼
+                                                    фајл промијењен
+                                                           │
+                                                           ▼
+                                                    handleTrackChanged()
+                                                    (детекција + акција)
+```
+
+## Подешавања (UserDefaults кључеви)
+
+| Кључ | Тип | Default | Опис |
+|---|---|---|---|
+| `EndlessPrivateSession` | Bool | false | Одржава приватну сесију укљученом |
+| `RestartToSkipAds` | Bool | false | Рестартуј Spotify умјесто мутирања |
+| `StartSpotify` | Bool | true | Аутоматски покрени Spotify |
+| `StartSpotifyInBackground` | Bool | false | Покрени Spotify у позадини (--hide --background) |
+| `Notifications` | Bool | true | Прикажи macOS нотификације за рекламе |
+| `SongLogPath` | String? | nil | Путања до CSV фајла за логовање нумера |
+
+## Toggle шаблон (додавање новог подешавања)
+
+Сваки toggle прати исти шаблон:
+
+1. `SpotifyManager` -- property: `var myFeature = false`
+2. `AppDelegate` -- UserDefaults кључ: `let myFeatureKey = "MyFeature"`
+3. `AppDelegate` -- IBOutlet: `@IBOutlet weak var myFeatureCheckbox: NSMenuItem!`
+4. `AppDelegate` -- IBAction: `toggleMyFeature(_:)` (toggle property + state + save)
+5. `AppDelegate` -- `applicationDidFinishLaunching`: учитај из UserDefaults
+6. `MainMenu.xib` -- `<menuItem>` са `<action selector>` и `<outlet>` connection
+7. Локализације -- `"ObjectID.title"` у свих 7 `.strings` фајлова
