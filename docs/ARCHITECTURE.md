@@ -201,6 +201,33 @@ NSApplicationMain()
 | `Notifications` | Bool | true | Прикажи macOS нотификације за рекламе |
 | `SongLogPath` | String? | nil | Путања до CSV фајла за логовање нумера |
 
+## Lessons Learned
+
+### Spotify refocus — неуспјели покушаји
+
+При рестарту Spotify-ја (ad-skip), Spotify краде фокус од корисникове активне апликације. Овдје су сви покушаји рјешења и зашто су пропали:
+
+| # | Приступ | Проблем |
+|---|---|---|
+| 1 | `set visible to false` | Потпуно сакрива Spotify — нестаје из Cmd+Tab и Mission Control. Корисник га не може пронаћи. |
+| 2 | `set frontmost to false` + `activate(previousApp)` сачуван прије quit-а (7s раније) | Ако корисник Cmd+Tab-ује у међувремену, `previousApp` је застарјела → активира погрешну апликацију. |
+| 3 | Исто као #2 али провјера `if currentFront == spotify` | И даље користи застарјелу `previousApp` за activate. |
+| 4 | `sendSpotifyToBack()` само на крају restartSpotify (t=7s), уклоњен из handleSpotifyQuit | handleSpotifyQuit позива play без sendToBack → Spotify остаје front 5+ секунди. |
+| 5 | `sendSpotifyToBack()` послије сваког play (и handleSpotifyQuit и restartSpotify) | Два паралелна пута (restartSpotify тајмери + handleSpotifyQuit retry) стварају "врзино коло" — борба за фокус са корисниковим Cmd+Tab. |
+| 6 | `restorePreviousApp()` — activate само ако Spotify frontmost, само на крају | `set frontmost to false` сам по себи не враћа фокус поуздано. Треба и activate. |
+| 7 | `set frontmost to false` + fallback: итерирај `runningApplications`, activate прву видљиву | `runningApplications` НИЈЕ сортиран по Z-order стеку → активира Терминал умјесто VS Code. |
+| 8 | Само `set frontmost to false`, без fallback-а | Spotify остаје front — `set frontmost to false` не ради поуздано сам. |
+
+**Кључни увиди:**
+- `set frontmost to false` сам по себи НЕ гарантује да ће macOS активирати другу апликацију
+- `previousFrontmostApp` сачуван прије quit-а застаријева за 5-10s — корисник може промијенити фокус
+- `NSWorkspace.shared.runningApplications` НЕ враћа Z-order — не можемо знати ко је "одмах иза"
+- Позивање activate послије СВАКОГ play ствара борбу за фокус ако корисник истовремено Cmd+Tab-ује
+- Два паралелна пута (restartSpotify тајмери + handleSpotifyQuit retry) компликују ствари
+
+**Исправан приступ:**
+Сачувати frontmost апликацију **непосредно прије** сваког `spotifyPlay()` позива (не прије quit-а). Тако увијек имамо тренутно тачну апликацију. Послије play-а, ако Spotify украо фокус — activate сачувану. Ако корисник у међувремену промијенио фокус (Cmd+Tab) — не дирај.
+
 ## Toggle шаблон (додавање новог подешавања)
 
 Сваки toggle прати исти шаблон:
