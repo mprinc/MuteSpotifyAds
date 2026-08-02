@@ -34,18 +34,6 @@
                         <action selector="openProjectWebsite:" target="Voe-Tx-rLC" id="oYX-Ka-nYd"/>
                     </connections>
                 </menuItem>
-                <menuItem title="▶  Свирај" id="PlP-Ps-1nX">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="playPause:" target="Voe-Tx-rLC" id="PlP-Ac-2tY"/>
-                    </connections>
-                </menuItem>
-                <menuItem title="🚀 Покрени Спотифај" id="Lnc-Sp-1nX">
-                    <modifierMask key="keyEquivalentModifierMask"/>
-                    <connections>
-                        <action selector="launchSpotify:" target="Voe-Tx-rLC" id="Lnc-Ac-2tY"/>
-                    </connections>
-                </menuItem>
                 <menuItem isSeparatorItem="YES" id="j8S-qT-8fQ"/>
                 <menuItem title="∞  Private session" id="o3E-lf-Jhd">
                     <modifierMask key="keyEquivalentModifierMask"/>
@@ -103,6 +91,45 @@
                     </connections>
                 </menuItem>
                 <menuItem isSeparatorItem="YES" id="75F-I8-7yq"/>
+                <menuItem title="🎛 Контроле" enabled="NO" id="Dbg-Hd-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                </menuItem>
+                <menuItem title="▶  Свирај" id="PlP-Ps-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="playPause:" target="Voe-Tx-rLC" id="PlP-Ac-2tY"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="⏮  Претходна" id="Prv-Tr-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="previousTrack:" target="Voe-Tx-rLC" id="Prv-Ac-2tY"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="⏭  Сљедећа" id="Nxt-Tr-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="nextTrack:" target="Voe-Tx-rLC" id="Nxt-Ac-2tY"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="⏪  Назад 15s" id="Rew-15-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="rewind15:" target="Voe-Tx-rLC" id="Rew-Ac-2tY"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="⏏  Почетак пјесме" id="Rst-Tr-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="restartTrack:" target="Voe-Tx-rLC" id="Rst-Ac-2tY"/>
+                    </connections>
+                </menuItem>
+                <menuItem title="🚀 Покрени Спотифај" id="Lnc-Sp-1nX">
+                    <modifierMask key="keyEquivalentModifierMask"/>
+                    <connections>
+                        <action selector="launchSpotify:" target="Voe-Tx-rLC" id="Lnc-Ac-2tY"/>
+                    </connections>
+                </menuItem>
                 <menuItem title="🧪 Тест: симулирај рекламу" id="Tst-Ad-1nX">
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <connections>

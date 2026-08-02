@@ -39,6 +39,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
         updatePlayPauseTitle()
     }
 
+    @IBAction func nextTrack(_ sender: Any) {
+        spotifyManager?.spotifyNextTrack()
+    }
+
+    @IBAction func previousTrack(_ sender: Any) {
+        spotifyManager?.spotifyPreviousTrack()
+    }
+
+    @IBAction func rewind15(_ sender: Any) {
+        spotifyManager?.spotifyRewind15()
+    }
+
+    @IBAction func restartTrack(_ sender: Any) {
+        spotifyManager?.spotifyRestartTrack()
+    }
+
     @IBAction func launchSpotify(_ sender: Any) {
         spotifyManager?.startSpotify(foreground: true)
     }
@@ -124,6 +140,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSUserNotificationCenterDele
             sender.state = .off
         } else {
             spotifyManager?.startSpotifyInBackground = true
+            // Сакриј Spotify — исти механизам као open --hide при покретању
+            for app in NSWorkspace.shared.runningApplications {
+                if app.bundleIdentifier == "com.spotify.client" {
+                    app.hide()
+                    break
+                }
+            }
             sender.state = .on
         }
         UserDefaults.standard.set(spotifyManager?.startSpotifyInBackground, forKey: startSpotifyInBackgroundKey)

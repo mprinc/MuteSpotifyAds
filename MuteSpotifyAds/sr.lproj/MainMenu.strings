@@ -37,6 +37,21 @@
 /* Class = "NSMenuItem"; title = " •  Notifications"; ObjectID = "xcw-JU-8Ai"; */
 "xcw-JU-8Ai.title" = " •  Обавјештења";
 
+/* Class = "NSMenuItem"; title = "🎛 Controls"; ObjectID = "Dbg-Hd-1nX"; */
+"Dbg-Hd-1nX.title" = "🎛 Контроле";
+
+/* Class = "NSMenuItem"; title = "⏮  Previous"; ObjectID = "Prv-Tr-1nX"; */
+"Prv-Tr-1nX.title" = "⏮  Претходна";
+
+/* Class = "NSMenuItem"; title = "⏭  Next"; ObjectID = "Nxt-Tr-1nX"; */
+"Nxt-Tr-1nX.title" = "⏭  Сљедећа";
+
+/* Class = "NSMenuItem"; title = "⏪  Rewind 15s"; ObjectID = "Rew-15-1nX"; */
+"Rew-15-1nX.title" = "⏪  Назад 15s";
+
+/* Class = "NSMenuItem"; title = "⏏  Restart track"; ObjectID = "Rst-Tr-1nX"; */
+"Rst-Tr-1nX.title" = "⏏  Почетак пјесме";
+
 /* Class = "NSMenuItem"; title = "🧪 Test: simulate ad"; ObjectID = "Tst-Ad-1nX"; */
 "Tst-Ad-1nX.title" = "🧪 Тест: симулирај рекламу";
 

@@ -322,29 +322,57 @@ class SpotifyManager: NSObject {
     func toggleSpotifyPlayPause() {
         _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "playpause")
     }
+
+    func spotifyNextTrack() {
+        _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "next track")
+    }
+
+    func spotifyPreviousTrack() {
+        _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "previous track")
+    }
+
+    func spotifyRewind15() {
+        _ = runAppleScript(script: """
+            tell application "Spotify"
+                set pos to player position
+                if pos > 15 then
+                    set player position to (pos - 15)
+                else
+                    set player position to 0
+                end if
+            end tell
+        """)
+    }
+
+    func spotifyRestartTrack() {
+        _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "set player position to 0")
+    }
     
+    /// UNUSED: Чува се за потенцијални fallback ако app.hide() не буде довољан.
+    /// sendSpotifyToBack() тренутно користи app.hide() и не зависи од овог.
+    var appBeforePlay: NSRunningApplication?
+
     func spotifyPlay() {
+        // Сачувај frontmost САМО ако није Spotify (да fallback не активира Spotify назад)
+        let current = NSWorkspace.shared.frontmostApplication
+        if current?.bundleIdentifier != "com.spotify.client" {
+            appBeforePlay = current
+        }
         _ = runAppleScript(script: SpotifyManager.appleScriptSpotifyPrefix + "play")
     }
 
+    /// Сакрива Spotify у позадину (Cmd+H) без уклањања из Cmd+Tab.
+    /// Види ARCHITECTURE.md "Lessons Learned > Spotify refocus" за историју неуспјелих покушаја.
     func sendSpotifyToBack() {
-        let spotifyBundleId = "com.spotify.client"
-        guard NSWorkspace.shared.frontmostApplication?.bundleIdentifier == spotifyBundleId else {
-            return // Spotify није frontmost — не дирај корисников фокус
-        }
-        _ = runAppleScript(script: "tell application \"System Events\" to set frontmost of process \"Spotify\" to false")
-
-        // Fallback: ако Spotify и даље frontmost, активирај прву видљиву апликацију иза
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: {
-            if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == spotifyBundleId {
-                for app in NSWorkspace.shared.runningApplications {
-                    if app.activationPolicy == .regular && !app.isHidden && app.bundleIdentifier != spotifyBundleId {
-                        app.activate(options: [])
-                        break
-                    }
-                }
+        // app.hide() = Cmd+H = исти механизам као open --hide --background при покретању
+        // За разлику од "set visible to false", Spotify ОСТАЈЕ у Cmd+Tab
+        // За разлику од "set frontmost to false", ово ПОУЗДАНО ради без timing проблема
+        for app in NSWorkspace.shared.runningApplications {
+            if app.bundleIdentifier == "com.spotify.client" {
+                app.hide()
+                break
             }
-        })
+        }
     }
     
     /**
